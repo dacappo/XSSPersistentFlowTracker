@@ -1,0 +1,25 @@
+{
+   "manifest_version" : 2,
+   "name" : "JS Tracker",
+   "description" : "Tracking of client-side persisten XSS by use of taint br",
+   "version" : "1.0",
+
+   "content_scripts" : [
+      {
+         "matches" : ["http://*/*","https://*/*"],
+         "js" : ["content.js"],
+         "run_at" : "document_start",
+         "all_frames" : true
+      }
+   ],
+   
+   "permissions" : [
+      "tabs", "http://*/*", "https://*/*"
+   ],
+   
+   "browser_action" : {
+      "default_icon" : "logo_transparent.png",
+      "default_title" : "Persistent XSS Tracker"
+   },
+   "web_accessible_resources": ["wrapper.js"]
+}
