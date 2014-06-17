@@ -45,9 +45,17 @@ var flowTracker = {};
 
 	var loggedFlows = [];
 
+	var getSink = function(sink) {
+		return sinks[sink];
+	};
+
+	var getSource = function(source) {
+		return sources[source];
+	};
+
 	var logFirstOrderFlow = function(flow) {
-
-
+		loggedFlows.push(flow);
+		console.info("Tainted cookie written from " + flow.taintArray + " to "  + getSink(flow.sink) + " - " + flow.data);
 	};
 
 	var containsSourceFromURL = function(taintArray) {
@@ -61,33 +69,34 @@ var flowTracker = {};
 		return false;
 	};
 
+	var containsSourceFromStorage = function(taintArray) {
+		var i = 0;
 
-	var getSink = function(sink) {
-		return sinks[sink];
-	};
-
-	var getSource = function(source) {
-		return sources[source];
+		for(i = 0; i < taintArray.length; i++) {
+			if (taintArray[i] === 8 || taintArray[i] === 13 || taintArray[i] === 14) {
+				return true;
+			}
+		}
+		return false;
 	};
 
 	/* Check if input flows into any storage sink */
 	var checkFirstOrderFlow = function(flow) {
 		/* setItem of session or local storage */
 		if (flow.sink === 21 && containsSourceFromURL(flow.taintArray)) {
-			logFirstOrderFlow(flow);
-			console.info("Tainted cookie written from " + flow.taintArray + " to "  + getSink(flow.sink) + " - " + flow.data);
-		
+			logFirstOrderFlow(flow);		
 		/* set cookie */
 		} else if (flow.sink === 14 && containsSourceFromURL(flow.taintArray)) {
 			logFirstOrderFlow(flow);
-			console.log(flow);
-			console.info("Tainted cookie written from " + flow.taintArray + " to "  + getSink(flow.sink) + " - " + flow.data);
 		}
 	};
 	
 	/* Check if input in the storage flows into a vulnerable sink */
 	var checkSecondOrderFlow = function(flow) {
-
+		/* setItem of session or local storage */
+		if (flow.sink > 0 && flow.sink < 9 && containsSourceFromStorage(flow.taintArray)) {
+			console.info("Second order flow detected!");
+		}
 	};
 
 	/* Function to check detected flows */
@@ -98,6 +107,7 @@ var flowTracker = {};
 
 }(flowTracker));
 
+/* Define function that is called by the taint browser to hand over flows */
 var ___DOMXSSFinderReport = function (sink, data, taintArray, details, url) {
 	
 	flowTracker.handleFlow({
@@ -109,4 +119,5 @@ var ___DOMXSSFinderReport = function (sink, data, taintArray, details, url) {
 	});	
 };
 
+/* Log that this file was run */
 console.log("Tracking initialized");
