@@ -53,6 +53,35 @@ var flowTracker = {};
 		return sources[source];
 	};
 
+	/* Returns tainted parts of a flow as an object array */
+	var getTaintedParts = function(flow) {
+		var i, currentTaintLength;
+		var taintParts = [];
+
+		/* Iterate over written data */
+		for (i = 0; i < flow.taintArray.length; i += currentTaintLength) {
+			currentTaintLength = 0;
+			/* Check length of part with same source */
+			while (i + currentTaintLength < flow.taintArray.length && flow.taintArray[i + currentTaintLength] === flow.taintArray[i]) {
+				currentTaintLength++;
+			}
+			/* Push part with same source as object */
+			taintParts.push({"source" : flow.taintArray[i], "data" : flow.data.substring(i, i + currentTaintLength)});
+		}
+
+		return taintParts;
+	};
+
+	var matchTaintedValuesWithLog = function(flow) {
+		var i = 0;
+		var taintPartArray = getTaintedParts(flow);
+
+		for(i = 0; i < taintPartArray.length; i++) {
+			console.log(taintPartArray[i]);
+		}
+		
+	};
+
 	var logFirstOrderFlow = function(flow) {
 		loggedFlows.push(flow);
 		console.info("Tainted cookie written from " + flow.taintArray + " to "  + getSink(flow.sink) + " - " + flow.data);
@@ -62,6 +91,7 @@ var flowTracker = {};
 		var i = 0;
 
 		for(i = 0; i < taintArray.length; i++) {
+			/* If source from URL */
 			if (taintArray[i] > 0 && taintArray[i] < 8) {
 				return true;
 			}
@@ -73,6 +103,7 @@ var flowTracker = {};
 		var i = 0;
 
 		for(i = 0; i < taintArray.length; i++) {
+			/* If cookie, session or local storage */
 			if (taintArray[i] === 8 || taintArray[i] === 13 || taintArray[i] === 14) {
 				return true;
 			}
@@ -95,6 +126,7 @@ var flowTracker = {};
 	var checkSecondOrderFlow = function(flow) {
 		/* setItem of session or local storage */
 		if (flow.sink > 0 && flow.sink < 9 && containsSourceFromStorage(flow.taintArray)) {
+			matchTaintedValuesWithLog(flow);
 			console.info("Second order flow detected!");
 		}
 	};
