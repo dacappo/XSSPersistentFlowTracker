@@ -72,12 +72,22 @@ var flowTracker = {};
 		return taintParts;
 	};
 
-	var matchTaintedValuesWithLog = function(flow) {
+	var matchTaintedPartsWithLog = function(taintPart) {
+		var i = 0;
+
+		for (i = 0; i < loggedFlows.length; i++) {
+			if (loggedFlows[i].data.indexOf(taintPart.data) >= 0) {
+				console.info("Second order flow found: Part " + taintPart.data + " from " + getSource(taintPart.source) + " found within " + getSource(loggedFlows[i].taintArray[loggedFlows[i].data.indexOf(taintPart.data)]) + "!");
+			}
+		}
+	};
+
+	var matchFlowWithLog = function(flow) {
 		var i = 0;
 		var taintPartArray = getTaintedParts(flow);
 
 		for(i = 0; i < taintPartArray.length; i++) {
-			console.log(taintPartArray[i]);
+			matchTaintedPartsWithLog(taintPartArray[i]);
 		}
 		
 	};
@@ -126,7 +136,7 @@ var flowTracker = {};
 	var checkSecondOrderFlow = function(flow) {
 		/* setItem of session or local storage */
 		if (flow.sink > 0 && flow.sink < 9 && containsSourceFromStorage(flow.taintArray)) {
-			matchTaintedValuesWithLog(flow);
+			matchFlowWithLog(flow);
 			console.info("Second order flow detected!");
 		}
 	};
