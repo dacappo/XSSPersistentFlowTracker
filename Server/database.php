@@ -1,11 +1,13 @@
 <?php
 	
 	/* */
-	$logQueries = false;
+	$logDatabaseQueries = true;
 
 	function logDatabase($message) {
-		if ($logDatabaseQueries) {
-			echo $message;
+		if ($GLOBALS['logDatabaseQueries']) {
+			$file = "log.txt";
+			$current = file_get_contents($file);
+			file_put_contents($file, $current . $message . "\n");
 		}
 	}
 
@@ -28,15 +30,16 @@
 	function initializeDatabase($dbh) {
 		$queries = array();
 		
-		array_push($queries, $createTableCookieWrite = $dbh->prepare('CREATE TABLE IF NOT EXISTS Cookies (`Url` varchar(2048), `Data` text, `TaintArray` text, `Key` varchar(2048) `Value` varchar(2048), `Path` varchar(200), `Expire` varchar(200))'));
+		array_push($queries, $createTableCookieWrite = $dbh->prepare('CREATE TABLE IF NOT EXISTS Cookies (`Url` varchar(2048), `Data` text, `TaintArray` text, `Key` varchar(2048), `Value` varchar(2048), `Path` varchar(200), `Expire` varchar(200))'));
 		array_push($queries, $createTableSessionWrite = $dbh->prepare('CREATE TABLE IF NOT EXISTS SessionStorage (`Url` varchar(2048), `Data` text, `TaintArray` text, `Key` varchar(2048), `Value` varchar(2048))'));
 		array_push($queries, $createTableLocalWrite = $dbh->prepare('CREATE TABLE IF NOT EXISTS LocalStorage (`Url` varchar(2048), `Data` text, `TaintArray` text, `Key` varchar(2048), `Value` varchar(2048))'));
+		array_push($queries, $createTableSecondOrderFlowWrite = $dbh->prepare('CREATE TABLE IF NOT EXISTS SecondOrderFlows (`Sink` int, `Url` varchar(2048), `Data` text, `TaintArray` text)'));
 
 		foreach ($queries as $q) {
 			if($q->execute()) {
-			 	logDatabase("Query ran successfully: <span>" . $q->queryString . "</span><br>");
+			 	logDatabase("Query ran successfully: " . $q->queryString);
 			} else {
-			    logDatabase("Error running query: " . array_pop($q->errorInfo()) . " : <span>" . $q->queryString . "</span><br>");
+			    logDatabase("Error running query: " . array_pop($q->errorInfo()) . " : " . $q->queryString );
 			}
 		}
 	}

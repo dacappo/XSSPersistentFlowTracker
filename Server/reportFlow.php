@@ -13,9 +13,9 @@
 		$traceCookie->bindParam(':expire', $_POST["expire"]);
 
 		if($traceCookie->execute()) {
-			logDatabase ("Query ran successfully: <span>" . $traceCookie->queryString . "</span><br>");
+			logDatabase ("Query ran successfully: " . $traceCookie->queryString);
 		} else {
-			logDatabase ("Error running query: " . array_pop($traceCookie->errorInfo()) . " : <span>" . $traceCookie->queryString . "</span><br>");
+			logDatabase ("Error running query: " . array_pop($traceCookie->errorInfo()) . " : " . $traceCookie->queryString);
 		}
 	}
 
@@ -28,9 +28,9 @@
 		$traceSession->bindParam(':value', $_POST["value"]);
 
 		if($traceSession->execute()) {
-			logDatabase ("Query ran successfully: <span>" . $traceSession->queryString . "</span><br>");
+			logDatabase ("Query ran successfully: " . $traceSession->queryString);
 		} else {
-			logDatabase ("Error running query: " . array_pop($traceSession->errorInfo()) . " : <span>" . $traceSession->queryString . "</span><br>");
+			logDatabase ("Error running query: " . array_pop($traceSession->errorInfo()) . " : " . $traceSession->queryString);
 		}
 		
 	}
@@ -44,10 +44,24 @@
 		$traceLocal->bindParam(':value', $_POST["value"]);
 
 		if($traceLocal->execute()) {
-			logDatabase ("Query ran successfully: <span>" . $traceLocal->queryString . "</span><br>");
+			logDatabase ("Query ran successfully: " . $traceLocal->queryString);
 		} else {
-			logDatabase ("Error running query: " . array_pop($traceLocal->errorInfo()) . " : <span>" . $traceLocal->queryString . "</span><br>");
+			logDatabase ("Error running query: " . array_pop($traceLocal->errorInfo()) . " : " . $traceLocal->queryString);
 		}		
+	}
+
+	function traceSecondOrderFlow($dbh) {
+		$traceSecOrderFlow = $dbh->prepare('INSERT INTO SecondOrderFlows VALUES(:sink, :url, :data, :taint)');
+		$traceSecOrderFlow->bindParam(':sink', $_POST["sink"]);
+		$traceSecOrderFlow->bindParam(':url', $_POST["url"]);
+		$traceSecOrderFlow->bindParam(':data', $_POST["data"]);
+		$traceSecOrderFlow->bindParam(':taint', $_POST["taintArray"]);
+
+		if($traceSecOrderFlow->execute()) {
+			logDatabase ("Query ran successfully: " . $traceSecOrderFlow->queryString . "");
+		} else {
+			logDatabase ("Error running query: " . array_pop($traceSecOrderFlow->errorInfo()) . " : " . $traceSecOrderFlow->queryString );
+		}
 	}
 
 	function writeDataSet() {
@@ -55,13 +69,16 @@
 		/* Set up database connection and tables */
 		$dbh = connectToDatabase("localhost","root","root","XSS");
 		initializeDatabase($dbh);
-		
+
 		if($_POST["sink"] === "14") {
+			
 			traceCookie($dbh);
 		} else if($_POST["sink"] === "21") {
 			traceSessionStorage($dbh);
-		} else if($_POST["sink"] === "2") {
-			traceLocalStorage($dbh);
+		} else {
+			global $message;
+			$message = "here";
+			traceSecondOrderFlow($dbh);
 		}
 	}
 
@@ -74,6 +91,6 @@
 	header('Content-type: application/json');
 	header('Cache-Control: no-cahe, must-revalidate');
 
-	$result = ['sink'=>$_POST["sink"]];
+	$result = ['sink'=>$_POST["sink"], 'message'=>$message];
 
 	echo (json_encode($result));

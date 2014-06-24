@@ -11,7 +11,7 @@ function reportFlow(flow, sendResponse) {
 
 	xhr.onreadystatechange = function(sendResponse) {
 		if (xhr.readyState == 4 && xhr.status == 200) {
-			sendResponse(JSON.parse(xhr.responseText));
+			alert(JSON.stringify(JSON.parse(xhr.responseText)));
 		}
 	};
 	xhr.open("POST", src, true);

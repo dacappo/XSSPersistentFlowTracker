@@ -2,7 +2,7 @@
 	"use strict";
 
 	function handleResult(result) {
-		console.log(result);
+		alert(result);
 	}
 
 	function messageBackground(flow) {
