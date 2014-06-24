@@ -1,11 +1,11 @@
 <?php
 	
 	/* */
-	$logDatabaseQueries = false;
+	$logQueries = false;
 
-	function log(message) {
-		if (logDatabaseQueries) {
-			echo message;
+	function logDatabase($message) {
+		if ($logDatabaseQueries) {
+			echo $message;
 		}
 	}
 
@@ -17,7 +17,7 @@
 	    try {
 	        $dbh = new PDO($dsn, $user, $password);
 	    } catch (PDOException $e) {
-	        log 'Connection failed: ' . $e->getMessage();
+	        logDatabase('Connection failed: ' . $e->getMessage());
 	        $dbh = false;
 	    }
 
@@ -34,9 +34,9 @@
 
 		foreach ($queries as $q) {
 			if($q->execute()) {
-			 	log "Query ran successfully: <span>" . $q->queryString . "</span><br>";
+			 	logDatabase("Query ran successfully: <span>" . $q->queryString . "</span><br>");
 			} else {
-			    log "Error running query: " . array_pop($q->errorInfo()) . " : <span>" . $q->queryString . "</span><br>";
+			    logDatabase("Error running query: " . array_pop($q->errorInfo()) . " : <span>" . $q->queryString . "</span><br>");
 			}
 		}
 	}

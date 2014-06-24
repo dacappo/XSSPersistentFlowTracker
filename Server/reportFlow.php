@@ -13,9 +13,9 @@
 		$traceCookie->bindParam(':expire', $_POST["expire"]);
 
 		if($traceCookie->execute()) {
-			log "Query ran successfully: <span>" . $traceCookie->queryString . "</span><br>";
+			logDatabase ("Query ran successfully: <span>" . $traceCookie->queryString . "</span><br>");
 		} else {
-			log "Error running query: " . array_pop($traceCookie->errorInfo()) . " : <span>" . $traceCookie->queryString . "</span><br>";
+			logDatabase ("Error running query: " . array_pop($traceCookie->errorInfo()) . " : <span>" . $traceCookie->queryString . "</span><br>");
 		}
 	}
 
@@ -28,9 +28,9 @@
 		$traceSession->bindParam(':value', $_POST["value"]);
 
 		if($traceSession->execute()) {
-			log "Query ran successfully: <span>" . $traceSession->queryString . "</span><br>";
+			logDatabase ("Query ran successfully: <span>" . $traceSession->queryString . "</span><br>");
 		} else {
-			log "Error running query: " . array_pop($traceSession->errorInfo()) . " : <span>" . $traceSession->queryString . "</span><br>";
+			logDatabase ("Error running query: " . array_pop($traceSession->errorInfo()) . " : <span>" . $traceSession->queryString . "</span><br>");
 		}
 		
 	}
@@ -44,9 +44,9 @@
 		$traceLocal->bindParam(':value', $_POST["value"]);
 
 		if($traceLocal->execute()) {
-			log "Query ran successfully: <span>" . $traceLocal->queryString . "</span><br>";
+			logDatabase ("Query ran successfully: <span>" . $traceLocal->queryString . "</span><br>");
 		} else {
-			log "Error running query: " . array_pop($traceLocal->errorInfo()) . " : <span>" . $traceLocal->queryString . "</span><br>";
+			logDatabase ("Error running query: " . array_pop($traceLocal->errorInfo()) . " : <span>" . $traceLocal->queryString . "</span><br>");
 		}		
 	}
 
