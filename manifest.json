@@ -4,6 +4,10 @@
    "description" : "Tracking of client-side persisten XSS by use of taint br",
    "version" : "1.0",
 
+   "background" : {
+      "scripts" : ["background.js"]
+   },
+
    "content_scripts" : [
       {
          "matches" : ["http://*/*","https://*/*"],

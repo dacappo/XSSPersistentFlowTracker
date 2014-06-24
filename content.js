@@ -1,8 +1,12 @@
 (function() {
 	"use strict";
 
-	function reportFlow(flow) {
-		var shrl
+	function handleResult(result) {
+		console.log(result);
+	}
+
+	function messageBackground(flow) {
+		chrome.runtime.sendMessage(flow, handleResult);
 	}
 
 	/* Listen for messages from page */
@@ -14,7 +18,7 @@
 
 		/* Only messages from the page and not the content script */
 		if (event.data.type && (event.data.type === "FROM_PAGE")) {
-			console.log(event.data.flow);
+			messageBackground(event.data.flow);
 		}
 	});
 
