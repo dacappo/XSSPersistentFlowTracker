@@ -1,0 +1,20 @@
+*** Second Order Flow Tracker ***
+
+Requirements
+1) Taint-aware Chrome browser
+2) Linux based OS
+
+Setup
+1) Start chrome with flags: 
+./chrome --no-sandbox --disable-xss-auditor --js-flags=--noblock-tainted
+
+2) Add XSS Flow tracking extension
+3) Setup MySQL database and set parameters in config.json
+4) Setup PHP server in the "Server" directory /
+   make sure mysql and PDO drivers are installed
+php -S host:port
+5) Browse websites
+
+
+Patrick Spiegel
+patrick.spiegel@sap.com

@@ -124,7 +124,9 @@ var ___DOMXSSFinderReport = function (sink, data, taintArray, details, url) {
 		"data" : data,
 		"taintArray" : taintArray,
 		"details" :details,
-		"url" : url
+		"url" : window.location.href,
+		"script" : url,
+		"origin" : window.location.origin
 	});	
 };
 

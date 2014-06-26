@@ -36,7 +36,7 @@
 	}
 
 	function traceLocalStorage($dbh) {
-		$traceLocal = $dbh->prepare('INSERT INTO LocalStorage VALUES(:url, :data, :taint :key, :value)');
+		$traceLocal = $dbh->prepare('INSERT INTO LocalStorage VALUES(:url, :data, :taint, :key, :value)');
 		$traceLocal->bindParam(':url', $_POST["url"]);
 		$traceLocal->bindParam(':data', $_POST["data"]);
 		$traceLocal->bindParam(':taint', $_POST["taintArray"]);
@@ -50,10 +50,30 @@
 		}		
 	}
 
+	function traceFirstOrderFlow($dbh) {
+		$traceFirOrderFlow = $dbh->prepare('INSERT INTO FirstOrderFlows VALUES(:sink, :origin, :url, :script, :data, :taint, :key, :value)');
+		$traceFirOrderFlow->bindParam(':sink', $_POST["sink"]);
+		$traceFirOrderFlow->bindParam(':url', $_POST["url"]);
+		$traceFirOrderFlow->bindParam(':origin', $_POST["origin"]);
+		$traceFirOrderFlow->bindParam(':script', $_POST["script"]);
+		$traceFirOrderFlow->bindParam(':data', $_POST["data"]);
+		$traceFirOrderFlow->bindParam(':taint', $_POST["taintArray"]);
+		$traceFirOrderFlow->bindParam(':key', $_POST["key"]);
+		$traceFirOrderFlow->bindParam(':value', $_POST["value"]);
+
+		if($traceFirOrderFlow->execute()) {
+			logDatabase ("Query ran successfully: " . $traceFirOrderFlow->queryString . "");
+		} else {
+			logDatabase ("Error running query: " . array_pop($traceFirOrderFlow->errorInfo()) . " : " . $traceFirOrderFlow->queryString );
+		}
+	}
+
 	function traceSecondOrderFlow($dbh) {
-		$traceSecOrderFlow = $dbh->prepare('INSERT INTO SecondOrderFlows VALUES(:sink, :url, :data, :taint)');
+		$traceSecOrderFlow = $dbh->prepare('INSERT INTO SecondOrderFlows VALUES(:sink, :origin, :url, :script, :data, :taint)');
 		$traceSecOrderFlow->bindParam(':sink', $_POST["sink"]);
 		$traceSecOrderFlow->bindParam(':url', $_POST["url"]);
+		$traceSecOrderFlow->bindParam(':origin', $_POST["origin"]);
+		$traceSecOrderFlow->bindParam(':script', $_POST["script"]);
 		$traceSecOrderFlow->bindParam(':data', $_POST["data"]);
 		$traceSecOrderFlow->bindParam(':taint', $_POST["taintArray"]);
 
@@ -71,13 +91,10 @@
 		initializeDatabase($dbh);
 
 		if($_POST["sink"] === "14") {
-			
-			traceCookie($dbh);
+			traceFirstOrderFlow($dbh);
 		} else if($_POST["sink"] === "21") {
-			traceSessionStorage($dbh);
+			traceFirstOrderFlow($dbh);
 		} else {
-			global $message;
-			$message = "here";
 			traceSecondOrderFlow($dbh);
 		}
 	}
@@ -91,6 +108,6 @@
 	header('Content-type: application/json');
 	header('Cache-Control: no-cahe, must-revalidate');
 
-	$result = ['sink'=>$_POST["sink"], 'message'=>$message];
+	$result = ['sink'=>$_POST["sink"]];
 
 	echo (json_encode($result));
