@@ -12,9 +12,9 @@
 	}
 
 
-	function connectToDatabase($server, $user, $password, $database) {
+	function connectToDatabase($server, $port, $user, $password, $database) {
 
-	    $dsn = 'mysql:dbname=' . $database . ';host=' . $server;
+	    $dsn = 'mysql:dbname=' . $database . ';host=' . $server . ";port=" . $port;
 
 	    try {
 	        $dbh = new PDO($dsn, $user, $password);

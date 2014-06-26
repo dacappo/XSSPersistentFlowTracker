@@ -86,8 +86,11 @@
 
 	function writeDataSet() {
 
+		$config = json_decode(file_get_contents("../config.json"));
+		$db_config = $config->{"database"};
+
 		/* Set up database connection and tables */
-		$dbh = connectToDatabase("localhost","root","root","XSS");
+		$dbh = connectToDatabase($db_config->{"host"}, $db_config->{"port"} , $db_config->{"user"}, $db_config->{"password"}, $db_config->{"schema"});
 		initializeDatabase($dbh);
 
 		if($_POST["sink"] === "14") {
