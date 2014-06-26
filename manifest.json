@@ -25,5 +25,5 @@
       "default_icon" : "logo_transparent.png",
       "default_title" : "Persistent XSS Tracker"
    },
-   "web_accessible_resources": ["wrapper.js"]
+   "web_accessible_resources": ["wrapper.js", "taintTracker.js"]
 }

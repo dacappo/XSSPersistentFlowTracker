@@ -1,12 +1,41 @@
 (function() {
 	"use strict";
 
-	function handleResult(result) {
-		alert(result);
-	}
+	var cookies = [];
+	var storage = [];
 
 	function messageBackground(flow) {
-		chrome.runtime.sendMessage(flow, handleResult);
+		chrome.runtime.sendMessage(flow);
+	}
+
+	function matchTaintedFlow(flow) {
+		/* match cookie first order flows */
+		if (flow.sink === 14) {
+			for(var i = 0; i < cookies.length; i++) {
+				if(flow.data.indexOf(cookies[i].value) >= 0) {
+					flow.key = cookies[i].key;
+					flow.value = cookies[i].value;
+				} 
+			}
+		} else if (flow.sink === 21) {
+			for(i = 0; i < storage.length; i++) {
+				if(flow.data.indexOf(storage[i].value) >= 0) {
+					flow.key = storage[i].key;
+					flow.value = storage[i].value;
+				} 
+			}
+		}
+		messageBackground(flow);
+	}
+
+	function logFunctionCall(dataset) {
+		if (dataset.type === "setCookie") {
+			cookies.push(dataset);
+		} else if (dataset.type === "sessionStorage.setItem") {
+			storage.push(dataset);
+		} else if (dataset.type === "localStorage.setItem") {
+			storage.push(dataset);
+		}
 	}
 
 	/* Listen for messages from page */
@@ -17,14 +46,16 @@
 		}
 
 		/* Only messages from the page and not the content script */
-		if (event.data.type && (event.data.type === "FROM_PAGE")) {
-			messageBackground(event.data.flow);
+		if (event.data.sender && (event.data.sender === "FROM_TRACKER")) {
+			matchTaintedFlow(event.data.flow);
+		} else if(event.data.sender && (event.data.sender === "FROM_WRAPPER")) {
+			logFunctionCall(event.data.dataset);
 		}
 	});
 
 	/* Create the script element */
-	var script = document.createElement("script");
-	script.setAttribute("type","text/javascript");
+	var script1 = document.createElement("script");
+	script1.setAttribute("type","text/javascript");
 
 	/* get script that is lateron inlcuded into the page */
 	var xhr = new XMLHttpRequest();
@@ -33,8 +64,22 @@
 	xhr.send();
 
 	/* Set the script code */
-	script.text = xhr.responseText;
+	script1.text = xhr.responseText;
+
+	/* Create the script element */
+	var script2 = document.createElement("script");
+	script2.setAttribute("type","text/javascript");
+
+	/* get script that is lateron inlcuded into the page */
+	xhr = new XMLHttpRequest();
+	src = chrome.extension.getURL("taintTracker.js");
+	xhr.open("GET", src, false);
+	xhr.send();
+
+	/* Set the script code */
+	script2.text = xhr.responseText;
 
 	/* Write the script tag into the DOM */
-	document.documentElement.insertBefore(script, document.documentElement.firstChild);
+	document.documentElement.insertBefore(script1, document.documentElement.firstChild);
+	document.documentElement.insertBefore(script2, document.documentElement.firstChild);
 }());
