@@ -51,8 +51,9 @@
 	}
 
 	function traceFirstOrderFlow($dbh) {
-		$traceFirOrderFlow = $dbh->prepare('INSERT INTO FirstOrderFlows VALUES(:sink, :origin, :url, :script, :data, :taint, :key, :value)');
+		$traceFirOrderFlow = $dbh->prepare('INSERT INTO FirstOrderFlows VALUES(:sink, :method, :origin, :url, :script, :data, :taint, :key, :value)');
 		$traceFirOrderFlow->bindParam(':sink', $_POST["sink"]);
+		$traceFirOrderFlow->bindParam(':method', $_POST["type"]);
 		$traceFirOrderFlow->bindParam(':url', $_POST["url"]);
 		$traceFirOrderFlow->bindParam(':origin', $_POST["origin"]);
 		$traceFirOrderFlow->bindParam(':script', $_POST["script"]);
@@ -93,9 +94,7 @@
 		$dbh = connectToDatabase($db_config->{"host"}, $db_config->{"port"} , $db_config->{"user"}, $db_config->{"password"}, $db_config->{"schema"});
 		initializeDatabase($dbh);
 
-		if($_POST["sink"] === "14") {
-			traceFirstOrderFlow($dbh);
-		} else if($_POST["sink"] === "21") {
+		if($_POST["sink"] === "14" || $_POST["sink"] === "21") {
 			traceFirstOrderFlow($dbh);
 		} else {
 			traceSecondOrderFlow($dbh);

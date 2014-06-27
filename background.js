@@ -4,19 +4,21 @@ chrome.runtime.onMessage.addListener(
 	}
 );
 
+function serializeForRequest(obj) {
+	var result = "";
+
+	for (var prop in obj) {
+		if (obj.hasOwnProperty(prop)) {
+			result += prop + "=" + obj[prop] + "&";
+		}
+	}
+	return result;
+}
+
 function reportFlow(flow) {
 	var xhr = new XMLHttpRequest();
 	var src = "http://localhost:8000/reportFlow.php";
-	var data = 	"sink=" + flow.sink + 
-				"&url=" + flow.url + 
-				"&origin=" + flow.origin + 
-				"&script=" + flow.script + 
-				"&taintArray=" + flow.taintArray + 
-				"&data=" + flow.data + 
-				"&details=" + flow.details +
-				"&key=" + flow.key + 
-				"&value=" + flow.value;
-
+	var data = 	serializeForRequest(flow);
 
 	xhr.onreadystatechange = function() {
 		if (xhr.readyState == 4 && xhr.status == 200) {

@@ -9,12 +9,13 @@
 	}
 
 	function matchTaintedFlow(flow) {
-		/* match cookie first order flows */
+		/* match cookie first order flows */ /* TODO: refactor that with just a single array */
 		if (flow.sink === 14) {
 			for(var i = 0; i < cookies.length; i++) {
 				if(flow.data.indexOf(cookies[i].value) >= 0) {
 					flow.key = cookies[i].key;
 					flow.value = cookies[i].value;
+					flow.type = cookies[i].type;
 				} 
 			}
 		} else if (flow.sink === 21) {
@@ -22,6 +23,7 @@
 				if(flow.data.indexOf(storage[i].value) >= 0) {
 					flow.key = storage[i].key;
 					flow.value = storage[i].value;
+					flow.type = storage[i].type;
 				} 
 			}
 		}

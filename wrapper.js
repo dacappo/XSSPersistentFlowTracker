@@ -11,7 +11,7 @@ var wrapper = {};
       // Get array of arguments
       var args = Array.prototype.slice.call(arguments);
 
-      // Add add log commands
+      // Add add log commandsl
       report.call(this, location.href, arguments[0], arguments[1]);
       
       // Call the actual function with given arguments
@@ -81,7 +81,7 @@ var wrapper = {};
   };
 
   function reportSetCookie(url, key, value) {
-  	window.postMessage({"sender" : "FROM_WRAPPER", "dataset" : { "type" : "setCookie", "url" : url, "key" : key, "value" : value }}, "*");
+  	window.postMessage({"sender" : "FROM_WRAPPER", "dataset" : { "type" : "document.cookie", "url" : url, "key" : key, "value" : value }}, "*");
   };
 
   

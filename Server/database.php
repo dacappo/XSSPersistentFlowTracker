@@ -30,7 +30,7 @@
 	function initializeDatabase($dbh) {
 		$queries = array();
 		
-		array_push($queries, $createTableSessionWrite = $dbh->prepare('CREATE TABLE IF NOT EXISTS FirstOrderFlows (`Sink` int, `Origin` varchar(2048), `Url` varchar(2048), `Script` varchar(2048), `Data` text, `TaintArray` text, `Key` varchar(2048), `Value` varchar(2048))'));
+		array_push($queries, $createTableSessionWrite = $dbh->prepare('CREATE TABLE IF NOT EXISTS FirstOrderFlows (`Sink` int, `Method` varchar(100), `Origin` varchar(2048), `Url` varchar(2048), `Script` varchar(2048), `Data` text, `TaintArray` text, `Key` varchar(2048), `Value` varchar(2048))'));
 		array_push($queries, $createTableSecondOrderFlowWrite = $dbh->prepare('CREATE TABLE IF NOT EXISTS SecondOrderFlows (`Sink` int, `Origin` varchar(2048), `Url` varchar(2048), `Script` varchar(2048), `Data` text, `TaintArray` text)'));
 
 		foreach ($queries as $q) {
