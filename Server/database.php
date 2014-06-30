@@ -30,8 +30,8 @@
 	function initializeDatabase($dbh) {
 		$queries = array();
 		
-		array_push($queries, $createTableSessionWrite = $dbh->prepare('CREATE TABLE IF NOT EXISTS FirstOrderFlows (`Sink` int, `Method` varchar(100), `Origin` varchar(2048), `Url` varchar(2048), `Script` varchar(2048), `Data` text, `TaintArray` text, `Key` varchar(2048), `Value` varchar(2048))'));
-		array_push($queries, $createTableSecondOrderFlowWrite = $dbh->prepare('CREATE TABLE IF NOT EXISTS SecondOrderFlows (`Sink` int, `Origin` varchar(2048), `Url` varchar(2048), `Script` varchar(2048), `Data` text, `TaintArray` text)'));
+		array_push($queries, $createTableSessionWrite = $dbh->prepare('CREATE TABLE IF NOT EXISTS FirstOrderFlows (`ID` int NOT NULL AUTO_INCREMENT, `Sink` int, `Method` varchar(100), `Origin` varchar(2048), `Url` varchar(2048), `Script` varchar(2048), `Data` text, `TaintArray` text, `Key` varchar(2048), `Value` varchar(2048), PRIMARY KEY (ID))'));
+		array_push($queries, $createTableSecondOrderFlowWrite = $dbh->prepare('CREATE TABLE IF NOT EXISTS SecondOrderFlows (`ID` int NOT NULL AUTO_INCREMENT, `Sink` int, `Origin` varchar(2048), `Url` varchar(2048), `Script` varchar(2048), `Data` text, `TaintArray` text, PRIMARY KEY (ID))'));
 
 		foreach ($queries as $q) {
 			if($q->execute()) {

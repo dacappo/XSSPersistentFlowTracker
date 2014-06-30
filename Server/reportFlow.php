@@ -1,66 +1,25 @@
 <?php
 	
 	require "database.php";
+	$DATA = json_decode($_POST["data"]);
 
-	function traceCookie($dbh) {
-		$traceCookie = $dbh->prepare('INSERT INTO Cookies VALUES(:url, :data, :taint, :key, :value, :path, :expire)');
-		$traceCookie->bindParam(':url', $_POST["url"]);
-		$traceCookie->bindParam(':data', $_POST["data"]);
-		$traceCookie->bindParam(':taint', $_POST["taintArray"]);
-		$traceCookie->bindParam(':key', $_POST["key"]);
-		$traceCookie->bindParam(':value', $_POST["value"]);
-		$traceCookie->bindParam(':path', $_POST["path"]);
-		$traceCookie->bindParam(':expire', $_POST["expire"]);
-
-		if($traceCookie->execute()) {
-			logDatabase ("Query ran successfully: " . $traceCookie->queryString);
-		} else {
-			logDatabase ("Error running query: " . array_pop($traceCookie->errorInfo()) . " : " . $traceCookie->queryString);
-		}
-	}
-
-	function traceSessionStorage($dbh) {
-		$traceSession = $dbh->prepare('INSERT INTO SessionStorage VALUES(:url, :data, :taint, :key, :value)');
-		$traceSession->bindParam(':url', $_POST["url"]);
-		$traceSession->bindParam(':data', $_POST["data"]);
-		$traceSession->bindParam(':taint', $_POST["taintArray"]);
-		$traceSession->bindParam(':key', $_POST["key"]);
-		$traceSession->bindParam(':value', $_POST["value"]);
-
-		if($traceSession->execute()) {
-			logDatabase ("Query ran successfully: " . $traceSession->queryString);
-		} else {
-			logDatabase ("Error running query: " . array_pop($traceSession->errorInfo()) . " : " . $traceSession->queryString);
-		}
-		
-	}
-
-	function traceLocalStorage($dbh) {
-		$traceLocal = $dbh->prepare('INSERT INTO LocalStorage VALUES(:url, :data, :taint, :key, :value)');
-		$traceLocal->bindParam(':url', $_POST["url"]);
-		$traceLocal->bindParam(':data', $_POST["data"]);
-		$traceLocal->bindParam(':taint', $_POST["taintArray"]);
-		$traceLocal->bindParam(':key', $_POST["key"]);
-		$traceLocal->bindParam(':value', $_POST["value"]);
-
-		if($traceLocal->execute()) {
-			logDatabase ("Query ran successfully: " . $traceLocal->queryString);
-		} else {
-			logDatabase ("Error running query: " . array_pop($traceLocal->errorInfo()) . " : " . $traceLocal->queryString);
-		}		
+	function stringifyArray($ar) {
+		return ("[" . implode(", ", $ar) . "]");
 	}
 
 	function traceFirstOrderFlow($dbh) {
-		$traceFirOrderFlow = $dbh->prepare('INSERT INTO FirstOrderFlows VALUES(:sink, :method, :origin, :url, :script, :data, :taint, :key, :value)');
-		$traceFirOrderFlow->bindParam(':sink', $_POST["sink"]);
-		$traceFirOrderFlow->bindParam(':method', $_POST["type"]);
-		$traceFirOrderFlow->bindParam(':url', $_POST["url"]);
-		$traceFirOrderFlow->bindParam(':origin', $_POST["origin"]);
-		$traceFirOrderFlow->bindParam(':script', $_POST["script"]);
-		$traceFirOrderFlow->bindParam(':data', $_POST["data"]);
-		$traceFirOrderFlow->bindParam(':taint', $_POST["taintArray"]);
-		$traceFirOrderFlow->bindParam(':key', $_POST["key"]);
-		$traceFirOrderFlow->bindParam(':value', $_POST["value"]);
+		global $DATA;
+
+		$traceFirOrderFlow = $dbh->prepare('INSERT INTO FirstOrderFlows (`Sink`, `Method`, `Origin`, `Url`, `Script`, `Data`, `TaintArray`, `Key`, `Value`) VALUES(:sink, :method, :origin, :url, :script, :data, :taint, :key, :value)');
+		$traceFirOrderFlow->bindParam(':sink', $DATA->{"sink"});
+		$traceFirOrderFlow->bindParam(':method', $DATA->{"type"});
+		$traceFirOrderFlow->bindParam(':url', $DATA->{"url"});
+		$traceFirOrderFlow->bindParam(':origin', $DATA->{"origin"});
+		$traceFirOrderFlow->bindParam(':script', $DATA->{"script"});
+		$traceFirOrderFlow->bindParam(':data', $DATA->{"data"});
+		$traceFirOrderFlow->bindParam(':taint', stringifyArray($DATA->{"taintArray"}));
+		$traceFirOrderFlow->bindParam(':key', $DATA->{"key"});
+		$traceFirOrderFlow->bindParam(':value', $DATA->{"value"});
 
 		if($traceFirOrderFlow->execute()) {
 			logDatabase ("Query ran successfully: " . $traceFirOrderFlow->queryString . "");
@@ -70,13 +29,15 @@
 	}
 
 	function traceSecondOrderFlow($dbh) {
-		$traceSecOrderFlow = $dbh->prepare('INSERT INTO SecondOrderFlows VALUES(:sink, :origin, :url, :script, :data, :taint)');
-		$traceSecOrderFlow->bindParam(':sink', $_POST["sink"]);
-		$traceSecOrderFlow->bindParam(':url', $_POST["url"]);
-		$traceSecOrderFlow->bindParam(':origin', $_POST["origin"]);
-		$traceSecOrderFlow->bindParam(':script', $_POST["script"]);
-		$traceSecOrderFlow->bindParam(':data', $_POST["data"]);
-		$traceSecOrderFlow->bindParam(':taint', $_POST["taintArray"]);
+		global $DATA;
+
+		$traceSecOrderFlow = $dbh->prepare('INSERT INTO SecondOrderFlows (`Sink`, `Origin`, `Url`, `Script`, `Data`, `TaintArray`) VALUES(:sink, :origin, :url, :script, :data, :taint)');
+		$traceSecOrderFlow->bindParam(':sink', $DATA->{"sink"});
+		$traceSecOrderFlow->bindParam(':url', $DATA->{"url"});
+		$traceSecOrderFlow->bindParam(':origin', $DATA->{"origin"});
+		$traceSecOrderFlow->bindParam(':script', $DATA->{"script"});
+		$traceSecOrderFlow->bindParam(':data', $DATA->{"data"});
+		$traceSecOrderFlow->bindParam(':taint', stringifyArray($DATA->{"taintArray"}));
 
 		if($traceSecOrderFlow->execute()) {
 			logDatabase ("Query ran successfully: " . $traceSecOrderFlow->queryString . "");
@@ -85,7 +46,10 @@
 		}
 	}
 
+
 	function writeDataSet() {
+		global $DATA;
+
 
 		$config = json_decode(file_get_contents("../config.json"));
 		$db_config = $config->{"database"};
@@ -94,7 +58,7 @@
 		$dbh = connectToDatabase($db_config->{"host"}, $db_config->{"port"} , $db_config->{"user"}, $db_config->{"password"}, $db_config->{"schema"});
 		initializeDatabase($dbh);
 
-		if($_POST["sink"] === "14" || $_POST["sink"] === "21") {
+		if($DATA->{"sink"} === 14 || $DATA->{"sink"} === 21) {
 			traceFirstOrderFlow($dbh);
 		} else {
 			traceSecondOrderFlow($dbh);
@@ -110,6 +74,6 @@
 	header('Content-type: application/json');
 	header('Cache-Control: no-cahe, must-revalidate');
 
-	$result = ['sink'=>$_POST["sink"]];
+	$result = ['sink'=>$DATA->{"sink"}];
 
 	echo (json_encode($result));

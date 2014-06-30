@@ -12,7 +12,7 @@
 		/* match cookie first order flows */ /* TODO: refactor that with just a single array */
 		if (flow.sink === 14) {
 			for(var i = 0; i < cookies.length; i++) {
-				if(flow.data.indexOf(cookies[i].value) >= 0) {
+				if(flow.data.indexOf(cookies[i].value) >= 0) {					
 					flow.key = cookies[i].key;
 					flow.value = cookies[i].value;
 					flow.type = cookies[i].type;
@@ -31,7 +31,7 @@
 	}
 
 	function logFunctionCall(dataset) {
-		if (dataset.type === "setCookie") {
+		if (dataset.type === "document.cookie") {
 			cookies.push(dataset);
 		} else if (dataset.type === "sessionStorage.setItem") {
 			storage.push(dataset);

@@ -12,7 +12,8 @@ function serializeForRequest(obj) {
 			result += prop + "=" + obj[prop] + "&";
 		}
 	}
-	return result;
+	
+	return "data=" + JSON.stringify(obj);
 }
 
 function reportFlow(flow) {
