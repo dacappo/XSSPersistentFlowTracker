@@ -30,8 +30,9 @@
 	function initializeDatabase($dbh) {
 		$queries = array();
 		
-		array_push($queries, $createTableSessionWrite = $dbh->prepare('CREATE TABLE IF NOT EXISTS FirstOrderFlows (`ID` int NOT NULL AUTO_INCREMENT, `Sink` int, `Method` varchar(100), `Origin` varchar(2048), `Url` varchar(2048), `Script` varchar(2048), `Data` text, `TaintArray` text, `Key` varchar(2048), `Value` varchar(2048), PRIMARY KEY (ID))'));
-		array_push($queries, $createTableSecondOrderFlowWrite = $dbh->prepare('CREATE TABLE IF NOT EXISTS SecondOrderFlows (`ID` int NOT NULL AUTO_INCREMENT, `Sink` int, `Origin` varchar(2048), `Url` varchar(2048), `Script` varchar(2048), `Data` text, `TaintArray` text, PRIMARY KEY (ID))'));
+		array_push($queries, $createTableSessionWrite = $dbh->prepare('CREATE TABLE IF NOT EXISTS FirstOrderFlows (`ID` bigint NOT NULL AUTO_INCREMENT, `Sink` int, `Method` varchar(100), `Origin` varchar(2048), `Url` varchar(2048), `Script` varchar(2048), `Data` text, `TaintArray` text, `Key` varchar(2048), `Value` varchar(2048), PRIMARY KEY (ID))'));
+		array_push($queries, $createTableSecondOrderFlowWrite = $dbh->prepare('CREATE TABLE IF NOT EXISTS SecondOrderFlows (`ID` char(13) NOT NULL, `Sink` int, `Origin` varchar(2048), `Url` varchar(2048), `Script` varchar(2048), `Data` text, `TaintArray` text, PRIMARY KEY (ID))'));
+		array_push($queries, $createTableSourcesWrite = $dbh->prepare('CREATE TABLE IF NOT EXISTS SecondOrderFlowSources (`FlowID` char(13) NOT NULL, `Source` varchar(2048), `Key` varchar(2048), `Value` varchar(2048),  FOREIGN KEY (FlowID) REFERENCES SecondOrderFlows(ID))'));
 
 		foreach ($queries as $q) {
 			if($q->execute()) {

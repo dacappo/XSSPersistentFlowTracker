@@ -5,14 +5,6 @@ chrome.runtime.onMessage.addListener(
 );
 
 function serializeForRequest(obj) {
-	var result = "";
-
-	for (var prop in obj) {
-		if (obj.hasOwnProperty(prop)) {
-			result += prop + "=" + obj[prop] + "&";
-		}
-	}
-	
 	return "data=" + JSON.stringify(obj);
 }
 

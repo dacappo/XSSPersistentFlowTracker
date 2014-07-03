@@ -28,10 +28,31 @@
 		}
 	}
 
+	function traceSecondOrderFlowSources($dbh, $flowId) {
+		global $DATA;
+
+		foreach ($DATA->{"sources"} AS $source) {
+			$traceSecOrderFlowSources = $dbh->prepare('INSERT INTO SecondOrderFlowSources (`FlowID`, `Source`, `Key`, `Value`) VALUES(:flowId, :source, :key, :value)');
+			$traceSecOrderFlowSources->bindParam(':flowId', $flowId);
+			$traceSecOrderFlowSources->bindParam(':source', $source->{"source"});
+			$traceSecOrderFlowSources->bindParam(':key', $source->{"key"});
+			$traceSecOrderFlowSources->bindParam(':value', $source->{"value"});
+
+			if($traceSecOrderFlowSources->execute()) {
+				logDatabase ("Query ran successfully: " . $traceSecOrderFlowSources->queryString . "");
+			} else {
+				logDatabase ("Error running query: " . array_pop($traceSecOrderFlowSources->errorInfo()) . " : " . $traceSecOrderFlowSources->queryString );
+			}
+		}
+	}
+
 	function traceSecondOrderFlow($dbh) {
 		global $DATA;
 
-		$traceSecOrderFlow = $dbh->prepare('INSERT INTO SecondOrderFlows (`Sink`, `Origin`, `Url`, `Script`, `Data`, `TaintArray`) VALUES(:sink, :origin, :url, :script, :data, :taint)');
+		$id = uniqid();
+
+		$traceSecOrderFlow = $dbh->prepare('INSERT INTO SecondOrderFlows (`ID`, `Sink`, `Origin`, `Url`, `Script`, `Data`, `TaintArray`) VALUES(:id, :sink, :origin, :url, :script, :data, :taint)');
+		$traceSecOrderFlow->bindParam(':id', $id);
 		$traceSecOrderFlow->bindParam(':sink', $DATA->{"sink"});
 		$traceSecOrderFlow->bindParam(':url', $DATA->{"url"});
 		$traceSecOrderFlow->bindParam(':origin', $DATA->{"origin"});
@@ -44,7 +65,11 @@
 		} else {
 			logDatabase ("Error running query: " . array_pop($traceSecOrderFlow->errorInfo()) . " : " . $traceSecOrderFlow->queryString );
 		}
+
+		traceSecondOrderFlowSources($dbh, $id);
 	}
+
+	
 
 
 	function writeDataSet() {
