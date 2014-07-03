@@ -76,15 +76,28 @@ var wrapper = {};
     /* Gets the value of a key-value pair*/
     getValueOfCookieSection : function(section) {
       return section.substring(section.indexOf('=') + 1, section.length);
+    },
+
+    getKeyValuePairs : function(multiCookieString) {
+    	var parts = multiCookieString.split(";");
+    	var result = [];
+
+    	for (var i = 0; i < parts.length; i++) {
+    		result.push({"key" : cookieParser.getKeyOfCookieSection(parts[i]), "value" : cookieParser.getValueOfCookieSection(parts[i])});
+    	}
+
+    	return result;
     }
 
   };
 
   function reportSetCookie(url, key, value) {
-  	window.postMessage({"sender" : "FROM_WRAPPER", "dataset" : { "type" : "document.cookie", "url" : url, "key" : key, "value" : value }}, "*");
-  };
+  	window.postMessage({"sender" : "FROM_WRAPPER", "dataset" : { "type" : "setCookie", "url" : url, "key" : key, "value" : value }}, "*");
+  }
 
-  
+  function reportGetCookie(url, pairs) {
+  	window.postMessage({"sender" : "FROM_WRAPPER", "dataset" : { "type" : "getCookie", "pairs" : pairs}}, "*");
+  }
  
     
   /* New setter function for cookies */
@@ -106,12 +119,11 @@ var wrapper = {};
   /* New getter function for cookies */
   function getCookie() {
 
-    // Log function call
-    
-    //reportGetCookie(location.href, cookieParser.getKey(input), cookieParser.getValue(input), cookieParser.getPath(input), cookieParser.getExpire(input));
-
     // Restore the document.cookie property
     delete document.cookie;
+
+    // Log cookie values
+    reportGetCookie(location.href, cookieParser.getKeyValuePairs(document.cookie));
 
     // Cache the resulting cookie value
     var result = document.cookie;
@@ -134,6 +146,9 @@ var wrapper = {};
 /* Wrap sessionStorage setter */
 sessionStorage.setItem = wrapper.wrap(sessionStorage.setItem, function(url, key, value) {window.postMessage({"sender" : "FROM_WRAPPER", "dataset" : { "type" : "sessionStorage.setItem", "url" : url, "key" : key, "value" : value}}, "*");});
 localStorage.setItem = wrapper.wrap(localStorage.setItem, function(url, key, value) {window.postMessage({"sender" : "FROM_WRAPPER", "dataset" : {"type" : "localStorage.setItem", "url" : url, "key" : key, "value" : value}}, "*");});
+
+sessionStorage.getItem = wrapper.wrap(sessionStorage.setItem, function(url, key) {window.postMessage({"sender" : "FROM_WRAPPER", "dataset" : { "type" : "sessionStorage.getItem", "url" : url, "key" : key}}, "*");});
+localStorage.getItem = wrapper.wrap(localStorage.setItem, function(url, key) {window.postMessage({"sender" : "FROM_WRAPPER", "dataset" : {"type" : "localStorage.getItem", "url" : url, "key" : key}}, "*");});
 
 /* Define new getter and setter for document.cookie */
 wrapper.wrapCookie();
