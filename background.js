@@ -5,7 +5,7 @@ chrome.runtime.onMessage.addListener(
 );
 
 function serializeForRequest(obj) {
-	return "data=" + JSON.stringify(obj);
+	return "data=" + encodeURIComponent(JSON.stringify(obj));
 }
 
 function reportFlow(flow) {

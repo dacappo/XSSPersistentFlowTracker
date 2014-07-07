@@ -1,6 +1,7 @@
 <?php
 	
 	require "database.php";
+	logDatabase(stringifyArray($_POST));
 	$DATA = json_decode($_POST["data"]);
 
 	function stringifyArray($ar) {
@@ -10,9 +11,12 @@
 	function traceFirstOrderFlow($dbh) {
 		global $DATA;
 
-		$traceFirOrderFlow = $dbh->prepare('INSERT INTO FirstOrderFlows (`Sink`, `Method`, `Origin`, `Url`, `Script`, `Data`, `TaintArray`, `Key`, `Value`) VALUES(:sink, :method, :origin, :url, :script, :data, :taint, :key, :value)');
+		$id = uniqid();
+
+		$traceFirOrderFlow = $dbh->prepare('INSERT INTO FirstOrderFlows (`ID`, `Sink`, `Method`, `Origin`, `Url`, `Script`, `Data`, `TaintArray`, `Key`, `Value`) VALUES(:id, :sink, :method, :origin, :url, :script, :data, :taint, :key, :value)');
+		$traceFirOrderFlow->bindParam(':id', $id);
 		$traceFirOrderFlow->bindParam(':sink', $DATA->{"sink"});
-		$traceFirOrderFlow->bindParam(':method', $DATA->{"type"});
+		$traceFirOrderFlow->bindParam(':method', $DATA->{"method"});
 		$traceFirOrderFlow->bindParam(':url', $DATA->{"url"});
 		$traceFirOrderFlow->bindParam(':origin', $DATA->{"origin"});
 		$traceFirOrderFlow->bindParam(':script', $DATA->{"script"});
@@ -34,7 +38,7 @@
 		foreach ($DATA->{"sources"} AS $source) {
 			$traceSecOrderFlowSources = $dbh->prepare('INSERT INTO SecondOrderFlowSources (`FlowID`, `Source`, `Key`, `Value`) VALUES(:flowId, :source, :key, :value)');
 			$traceSecOrderFlowSources->bindParam(':flowId', $flowId);
-			$traceSecOrderFlowSources->bindParam(':source', $source->{"source"});
+			$traceSecOrderFlowSources->bindParam(':source', $source->{"method"});
 			$traceSecOrderFlowSources->bindParam(':key', $source->{"key"});
 			$traceSecOrderFlowSources->bindParam(':value', $source->{"value"});
 
@@ -83,9 +87,9 @@
 		$dbh = connectToDatabase($db_config->{"host"}, $db_config->{"port"} , $db_config->{"user"}, $db_config->{"password"}, $db_config->{"schema"});
 		initializeDatabase($dbh);
 
-		if($DATA->{"sink"} === 14 || $DATA->{"sink"} === 21) {
+		if($DATA->{"type"} === "firstOrder") {
 			traceFirstOrderFlow($dbh);
-		} else {
+		} else if ($DATA->{"type"} === "secondOrder") {
 			traceSecondOrderFlow($dbh);
 		}
 	}

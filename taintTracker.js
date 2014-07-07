@@ -2,7 +2,7 @@ var taintTracker = {};
 
 (function (namespace) {
 	"use strict";
-	
+	/*
 	var sources = {
 		"0"  : "benign",
 		"1"  : "location.href",
@@ -50,67 +50,15 @@ var taintTracker = {};
 
 	function getSource(source) {
 		return sources[source];
-	}
+	} */
 
 	function reportFlow(flow) {
 		window.postMessage({"sender" : "FROM_TRACKER", "flow" : flow}, "*");
 	}
-
-	function logFirstOrderFlow(flow) {
-		reportFlow(flow);
-		console.info("First-order-flow written from " + flow.taintArray + " to "  + getSink(flow.sink) + " - " + flow.data);
-	}
-
-	function logSecondOrderFlow(flow) {
-		reportFlow(flow);
-		console.info("Second-order-flow written from " + flow.taintArray + " to "  + getSink(flow.sink) + " - " + flow.data);
-	}
-
-	function containsSourceFromURL(taintArray) {
-		var i = 0;
-
-		for(i = 0; i < taintArray.length; i++) {
-			/* If source from URL */
-			if (taintArray[i] > 0 && taintArray[i] < 8) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	function containsSourceFromStorage(taintArray) {
-		var i = 0;
-
-		for(i = 0; i < taintArray.length; i++) {
-			/* If cookie, session or local storage */
-			if (taintArray[i] === 8 || taintArray[i] === 13 || taintArray[i] === 14) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/* Check if input flows into any storage sink */
-	function checkFirstOrderFlow(flow) {
-		/* setItem of session, local storage or cookie*/
-		if ((flow.sink === 21 || flow.sink === 14) && containsSourceFromURL(flow.taintArray)) {
-			logFirstOrderFlow(flow)	;	
-		}
-	}
-	
-	/* Check if input in the storage flows into a vulnerable sink */
-	function checkSecondOrderFlow(flow) {
-		/* setItem of session or local storage */
-		if (flow.sink > 0 && flow.sink < 9 && containsSourceFromStorage(flow.taintArray)) {
-			logSecondOrderFlow(flow);
-		}
-	}
-
 	
 	/* Function to check detected flows */
 	namespace.handleFlow = function(flow) {
-		checkFirstOrderFlow(flow);
-		checkSecondOrderFlow(flow);
+		reportFlow(flow);
 	};
 	
 }(taintTracker));

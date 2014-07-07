@@ -5,17 +5,20 @@ var wrapper = {};
   /* General wrapping function for functions */
   namespace.wrap = function(func, report) {
   
-    console.info('The wrapper for ' + func.name + '() is set!');
+    //console.info('The wrapper for ' + func.name + '() is set!');
     
     return function() {
+      var result;
       // Get array of arguments
       var args = Array.prototype.slice.call(arguments);
-
-      // Add add log commandsl
-      report.call(this, location.href, arguments[0], arguments[1]);
       
       // Call the actual function with given arguments
-      return func.apply(this, args);
+      result = func.apply(this, args);
+
+      // Add add log commandsl
+      report.call(this, location.href, result, arguments[0], arguments[1]);
+
+      return result;
     };
   };
 
@@ -92,11 +95,11 @@ var wrapper = {};
   };
 
   function reportSetCookie(url, key, value) {
-  	window.postMessage({"sender" : "FROM_WRAPPER", "dataset" : { "type" : "setCookie", "url" : url, "key" : key, "value" : value }}, "*");
+  	window.postMessage({"sender" : "FROM_WRAPPER", "dataset" : { "method" : "setCookie", "url" : url, "key" : key, "value" : value }}, "*");
   }
 
   function reportGetCookie(url, pairs) {
-  	window.postMessage({"sender" : "FROM_WRAPPER", "dataset" : { "type" : "getCookie", "pairs" : pairs}}, "*");
+  	window.postMessage({"sender" : "FROM_WRAPPER", "dataset" : { "method" : "getCookie", "pairs" : pairs}}, "*");
   }
  
     
@@ -144,11 +147,17 @@ var wrapper = {};
 }(wrapper));
 
 /* Wrap sessionStorage setter */
-sessionStorage.setItem = wrapper.wrap(sessionStorage.setItem, function(url, key, value) {window.postMessage({"sender" : "FROM_WRAPPER", "dataset" : { "type" : "sessionStorage.setItem", "url" : url, "key" : key, "value" : value}}, "*");});
-localStorage.setItem = wrapper.wrap(localStorage.setItem, function(url, key, value) {window.postMessage({"sender" : "FROM_WRAPPER", "dataset" : {"type" : "localStorage.setItem", "url" : url, "key" : key, "value" : value}}, "*");});
+sessionStorage.setItem = wrapper.wrap(sessionStorage.setItem, function(url, result, key, value) {window.postMessage({"sender" : "FROM_WRAPPER", "dataset" : { "method" : "sessionStorage.setItem", "url" : url, "key" : key, "value" : value}}, "*");});
+localStorage.setItem = wrapper.wrap(localStorage.setItem, function(url, result, key, value) {window.postMessage({"sender" : "FROM_WRAPPER", "dataset" : {"method" : "localStorage.setItem", "url" : url, "key" : key, "value" : value}}, "*");});
 
-sessionStorage.getItem = wrapper.wrap(sessionStorage.setItem, function(url, key) {window.postMessage({"sender" : "FROM_WRAPPER", "dataset" : { "type" : "sessionStorage.getItem", "url" : url, "key" : key}}, "*");});
-localStorage.getItem = wrapper.wrap(localStorage.setItem, function(url, key) {window.postMessage({"sender" : "FROM_WRAPPER", "dataset" : {"type" : "localStorage.getItem", "url" : url, "key" : key}}, "*");});
+sessionStorage.getItem = wrapper.wrap(sessionStorage.getItem, function(url, result, key) {
+	if (result)
+		window.postMessage({"sender" : "FROM_WRAPPER", "dataset" : { "method" : "sessionStorage.getItem", "url" : url, "key" : key, "value" : result}}, "*");
+});
+localStorage.getItem = wrapper.wrap(localStorage.getItem, function(url, result, key) {
+	if (result)
+		window.postMessage({"sender" : "FROM_WRAPPER", "dataset" : {"method" : "localStorage.getItem", "url" : url, "key" : key, "value" : result}}, "*");
+});
 
 /* Define new getter and setter for document.cookie */
 wrapper.wrapCookie();
