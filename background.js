@@ -1,24 +1,45 @@
-chrome.runtime.onMessage.addListener(
-	function(flow) {
-		reportFlow(flow);
-	}
-);
+(function() {
 
-function serializeForRequest(obj) {
-	return "data=" + encodeURIComponent(JSON.stringify(obj));
-}
+	var firstOrderFlows = [];
+	var secondOrderFlows = [];
 
-function reportFlow(flow) {
+	
+
 	var xhr = new XMLHttpRequest();
-	var src = "http://localhost:8000/reportFlow.php";
-	var data = 	serializeForRequest(flow);
+	var src = chrome.extension.getURL("config.json");
+	xhr.open("GET", src, false);
+	xhr.send();
 
-	xhr.onreadystatechange = function() {
-		if (xhr.readyState == 4 && xhr.status == 200) {
-			//sendResponse(JSON.stringify(JSON.parse(xhr.responseText)));
+	var settings = JSON.parse(xhr.responseText);
+
+	function serializeForRequest(obj) {
+		return "data=" + encodeURIComponent(JSON.stringify(obj));
+	}
+
+	function reportFlow(flow) {
+		var xhr = new XMLHttpRequest();
+		var src = "http://" + settings.server.host + ":" + settings.server.port + "/reportFlow.php";
+		var data = 	serializeForRequest(flow);
+
+		xhr.open("POST", src, true);
+		xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		xhr.send(data);
+	}
+
+	chrome.runtime.onMessage.addListener(
+		function(flow) {
+			// Log to server
+			if (settings.reportToServer) {
+				reportFlow(flow);
+			}
+
+			// Log locally
+			if (flow.type === "firstOrder") {
+				secondOrderFlows.push(flow);
+			} else if (flow.type === "secondOrder") {
+				secondOrderFlows.push(flow);
+			}
+
 		}
-	};
-	xhr.open("POST", src, true);
-	xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-	xhr.send(data);
-}
+	);
+}());

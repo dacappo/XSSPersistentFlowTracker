@@ -5,5 +5,12 @@
 		"user" : "root",
 		"password" : "root",
 		"schema" : "XSS"
-	}
+	},
+
+	"server" : {
+		"host" : "localhost",
+		"port" : "8000"
+	},
+
+	"reportToServer" : false
 }
