@@ -26,6 +26,28 @@
 		xhr.send(data);
 	}
 
+	function alertVulnerability(firstOrderFlow, SecondOrderFlow) {
+		alert("Set red icon");
+		chrome.browserAction.setIcon({path: "logo_alert.png"});
+	}
+
+	function checkForVulnerability(secondOrderFlow){
+		var i, j;
+
+		for (i = 0; i < firstOrderFlows.length; i++) {
+			if (firstOrderFlows[i].origin === secondOrderFlow.origin) {
+				for (j = 0; j < secondOrderFlow.sources.length; j++) {
+					if(secondOrderFlow.sources[j].key === firstOrderFlows[i].key) {
+						alertVulnerability(firstOrderFlows[i], secondOrderFlow);
+					}
+				}
+			} else {
+				return;
+			}
+
+		}		
+	}
+
 	chrome.runtime.onMessage.addListener(
 		function(flow) {
 			// Log to server
@@ -35,9 +57,10 @@
 
 			// Log locally
 			if (flow.type === "firstOrder") {
-				secondOrderFlows.push(flow);
+				firstOrderFlows.push(flow);
 			} else if (flow.type === "secondOrder") {
 				secondOrderFlows.push(flow);
+				checkForVulnerability(flow);
 			}
 
 		}
