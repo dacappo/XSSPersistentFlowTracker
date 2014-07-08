@@ -26,9 +26,22 @@
 		xhr.send(data);
 	}
 
-	function alertVulnerability(firstOrderFlow, SecondOrderFlow) {
-		alert("Set red icon");
-		chrome.browserAction.setIcon({path: "logo_alert.png"});
+	function alertVulnerability(firstOrderFlow, secondOrderFlow) {
+		alert("Vulnerability detected: " + JSON.stringify(firstOrderFlow) + "||" + JSON.stringify(secondOrderFlow));
+	}
+
+	function equals(sinkMethod, sourceMethod) {
+		var result;
+
+		if ((sinkMethod === "setCookie" && sourceMethod === "getCookie") ||
+			(sinkMethod === "localStorage.setItem" && sourceMethod === "localStorage.getItem") ||
+			(sinkMethod === "sessionStorage.setItem" && sourceMethod === "sessionStorage.getItem") ) {
+			result = true;
+		} else {
+			result = false;
+		}
+
+		return result;
 	}
 
 	function checkForVulnerability(secondOrderFlow){
@@ -37,14 +50,12 @@
 		for (i = 0; i < firstOrderFlows.length; i++) {
 			if (firstOrderFlows[i].origin === secondOrderFlow.origin) {
 				for (j = 0; j < secondOrderFlow.sources.length; j++) {
-					if(secondOrderFlow.sources[j].key === firstOrderFlows[i].key) {
+					if(secondOrderFlow.sources[j].key === firstOrderFlows[i].key &&
+						equals(firstOrderFlows[i].method, secondOrderFlow.sources[j].method)) {
 						alertVulnerability(firstOrderFlows[i], secondOrderFlow);
 					}
 				}
-			} else {
-				return;
 			}
-
 		}		
 	}
 

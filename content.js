@@ -170,7 +170,7 @@
 		for (i = 0; i < cookiesGet.length; i++) {
 			for (j = 0; j < cookiesGet[i].pairs.length; j++) {
 				if(cookiesGet[i].pairs[j].value.indexOf(taintPart.value) >= 0) {
-					return {"method" : cookiesGet[i].method, "key" : cookiesGet[i].pairs[j].key, "value" : cookiesGet[i].pairs[j].value};
+					return {"method" : cookiesGet[i].method, "key" : cookiesGet[i].pairs[j].key, "value" : cookiesGet[i].pairs[j].value, "source" : taintPart.source, "start" : taintPart.start, "end" : taintPart.end, "part" : taintPart.value};
 				}
 			}
 		}
@@ -183,7 +183,7 @@
 
 		for (i = 0; i < storageGet.length; i++) {
 			if(storageGet[i].value.indexOf(taintPart.value) >= 0) {
-				return {"method" : storageGet[i].method, "key" : storageGet[i].key, "value" : storageGet[i].value};
+				return {"method" : storageGet[i].method, "key" : storageGet[i].key, "value" : storageGet[i].value, "source" : taintPart.source, "start" : taintPart.start, "end" : taintPart.end, "part" : taintPart.value};
 			} 
 		}
 
@@ -214,7 +214,7 @@
 		// Loop through tainted parts
 		for (i = 0; i < taintParts.length; i++) {
 			result = matchFlowPart(taintParts[i]);
-			if (result !== null) {		
+			if (result !== null) {
 				flow.sources.push(result);
 			}
 		}

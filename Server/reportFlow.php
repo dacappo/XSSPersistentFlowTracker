@@ -1,7 +1,6 @@
 <?php
 	
 	require "database.php";
-	logDatabase(stringifyArray($_POST));
 	$DATA = json_decode($_POST["data"]);
 
 	function stringifyArray($ar) {
