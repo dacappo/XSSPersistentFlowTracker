@@ -3,23 +3,38 @@ var wrapper = {};
 (function (namespace) {
 
   /* General wrapping function for functions */
-  namespace.wrap = function(func, report) {
+  namespace.wrap = function(func, returnResult, report) {
+
+  	var newFunction;
   
-    //console.info('The wrapper for ' + func.name + '() is set!');
-    
-    return function() {
-      var result;
-      // Get array of arguments
-      var args = Array.prototype.slice.call(arguments);
-      
-      // Call the actual function with given arguments
-      result = func.apply(this, args);
+    if (returnResult) {  
+	    newFunction = function() {
+	      var result;
+	      // Get array of arguments
+	      var args = Array.prototype.slice.call(arguments);
+	      
+	      // Call the actual function with given arguments
+	      result = func.apply(this, args);
 
-      // Add add log commandsl
-      report.call(this, location.href, result, arguments[0], arguments[1]);
+	      // Add add log commandsl
+	      report.call(this, location.href, result, arguments[0], arguments[1]);
 
-      return result;
-    };
+	      return result;
+	    };
+	} else if (!returnResult) {
+		newFunction = function() {
+	      // Get array of arguments
+	      var args = Array.prototype.slice.call(arguments);
+
+	      // Add add log commandsl
+	      report.call(this, location.href, arguments[0], arguments[1]);
+	      
+	      // Call the actual function with given arguments
+	      func.apply(this, args);
+	    };
+	}
+
+	return newFunction;
   };
 
 
@@ -147,14 +162,14 @@ var wrapper = {};
 }(wrapper));
 
 /* Wrap sessionStorage setter */
-sessionStorage.setItem = wrapper.wrap(sessionStorage.setItem, function(url, result, key, value) {window.postMessage({"sender" : "FROM_WRAPPER", "dataset" : { "method" : "sessionStorage.setItem", "url" : url, "key" : key, "value" : value}}, "*");});
-localStorage.setItem = wrapper.wrap(localStorage.setItem, function(url, result, key, value) {window.postMessage({"sender" : "FROM_WRAPPER", "dataset" : {"method" : "localStorage.setItem", "url" : url, "key" : key, "value" : value}}, "*");});
+sessionStorage.setItem = wrapper.wrap(sessionStorage.setItem, false, function(url, key, value) {window.postMessage({"sender" : "FROM_WRAPPER", "dataset" : { "method" : "sessionStorage.setItem", "url" : url, "key" : key, "value" : value}}, "*");});
+localStorage.setItem = wrapper.wrap(localStorage.setItem, false,  function(url, key, value) {window.postMessage({"sender" : "FROM_WRAPPER", "dataset" : {"method" : "localStorage.setItem", "url" : url, "key" : key, "value" : value}}, "*");});
 
-sessionStorage.getItem = wrapper.wrap(sessionStorage.getItem, function(url, result, key) {
+sessionStorage.getItem = wrapper.wrap(sessionStorage.getItem, true, function(url, result, key) {
 	if (result)
 		window.postMessage({"sender" : "FROM_WRAPPER", "dataset" : { "method" : "sessionStorage.getItem", "url" : url, "key" : key, "value" : result}}, "*");
 });
-localStorage.getItem = wrapper.wrap(localStorage.getItem, function(url, result, key) {
+localStorage.getItem = wrapper.wrap(localStorage.getItem, true, function(url, result, key) {
 	if (result)
 		window.postMessage({"sender" : "FROM_WRAPPER", "dataset" : {"method" : "localStorage.getItem", "url" : url, "key" : key, "value" : result}}, "*");
 });

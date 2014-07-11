@@ -32,9 +32,9 @@
 			cookiesGet.push(dataset);
 		} else if (dataset.method === "sessionStorage.setItem") {
 			storageSet.push(dataset);
-		} else if (dataset.method === "localstorage.setItem") {
+		} else if (dataset.method === "localStorage.setItem") {
 			storageSet.push(dataset);
-		} else if (dataset.method === "sessionstorage.getItem") {
+		} else if (dataset.method === "sessionStorage.getItem") {
 			storageGet.push(dataset);
 		} else if (dataset.method === "localStorage.getItem") {
 			storageGet.push(dataset);
@@ -125,10 +125,10 @@
 
 	function handleFirstOrderStorageFlow(flow) {
 		var i;
-
 		// Loop through traced storage set calles
 		for (i = 0; i < storageSet.length; i++) {
 			// Match taint information with wrapper information
+
 			if (flow.data.indexOf(storageSet[i].value) >= 0) {
 				flow.key = storageSet[i].key;
 				flow.value = storageSet[i].value;
