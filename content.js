@@ -1,10 +1,12 @@
 (function() {
 	"use strict";
 
-	var cookiesSet = [];
-	var cookiesGet = [];
-	var storageSet = [];
-	var storageGet = [];
+	var cookiesSet = [],
+		cookiesGet = [],
+		sessionStorageSet = [],
+		sessionStorageGet = [],
+		localStorageSet = [],
+		localStorageGet = [];
 
 	/* Message to background page */
 	function messageBackground(flow) {
@@ -31,13 +33,13 @@
 		} else if (dataset.method === "getCookie") {
 			cookiesGet.push(dataset);
 		} else if (dataset.method === "sessionStorage.setItem") {
-			storageSet.push(dataset);
+			sessionStorageSet.push(dataset);
 		} else if (dataset.method === "localStorage.setItem") {
-			storageSet.push(dataset);
+			localStorageSet.push(dataset);
 		} else if (dataset.method === "sessionStorage.getItem") {
-			storageGet.push(dataset);
+			sessionStorageGet.push(dataset);
 		} else if (dataset.method === "localStorage.getItem") {
-			storageGet.push(dataset);
+			localStorageGet.push(dataset);
 		}
 	}
 
@@ -123,16 +125,32 @@
 		return result;
 	}
 
-	function handleFirstOrderStorageFlow(flow) {
+	function handleFirstOrderSessionStorageFlow(flow) {
 		var i;
 		// Loop through traced storage set calles
-		for (i = 0; i < storageSet.length; i++) {
+		for (i = 0; i < sessionStorageSet.length; i++) {
 			// Match taint information with wrapper information
 
-			if (flow.data.indexOf(storageSet[i].value) >= 0) {
-				flow.key = storageSet[i].key;
-				flow.value = storageSet[i].value;
-				flow.method = storageSet[i].method; 
+			if (flow.data.indexOf(sessionStorageSet[i].value) >= 0) {
+				flow.key = sessionStorageSet[i].key;
+				flow.value = sessionStorageSet[i].value;
+				flow.method = sessionStorageSet[i].method; 
+			}
+		}
+
+		traceFirstOrderFlow(flow);
+	}
+
+	function handleFirstOrderLocalStorageFlow(flow) {
+		var i;
+		// Loop through traced storage set calles
+		for (i = 0; i < localStorageSet.length; i++) {
+			// Match taint information with wrapper information
+
+			if (flow.data.indexOf(localStorageSet[i].value) >= 0) {
+				flow.key = localStorageSet[i].key;
+				flow.value = localStorageSet[i].value;
+				flow.method = localStorageSet[i].method; 
 			}
 		}
 
@@ -157,8 +175,10 @@
 
 	function matchFirstOrderFlow(flow) {
 
-		if (flow.sink === 21) {
-			handleFirstOrderStorageFlow(flow);
+		if (flow.sink === 21 && flow.details[0] === "localStorage") {
+			handleFirstOrderLocalStorageFlow(flow);
+		} else if (flow.sink === 21 && flow.details[0] === "sessionStorage") {
+			handleFirstOrderSessionStorageFlow(flow);
 		} else if (flow.sink === 14) {
 			handleFirstOrderCookieFlow(flow);
 		}
@@ -181,9 +201,15 @@
 	function matchFlowPartStorage(taintPart) {
 		var i;
 
-		for (i = 0; i < storageGet.length; i++) {
-			if(storageGet[i].value.indexOf(taintPart.value) >= 0) {
-				return {"method" : storageGet[i].method, "key" : storageGet[i].key, "value" : storageGet[i].value, "source" : taintPart.source, "start" : taintPart.start, "end" : taintPart.end, "part" : taintPart.value};
+		for (i = 0; i < localStorageGet.length; i++) {
+			if(localStorageGet[i].value.indexOf(taintPart.value) >= 0) {
+				return {"method" : localStorageGet[i].method, "key" : localStorageGet[i].key, "value" : localStorageGet[i].value, "source" : taintPart.source, "start" : taintPart.start, "end" : taintPart.end, "part" : taintPart.value};
+			} 
+		}
+
+		for (i = 0; i < sessionStorageGet.length; i++) {
+			if(sessionStorageGet[i].value.indexOf(taintPart.value) >= 0) {
+				return {"method" : sessionStorageGet[i].method, "key" : sessionStorageGet[i].key, "value" : sessionStorageGet[i].value, "source" : taintPart.source, "start" : taintPart.start, "end" : taintPart.end, "part" : taintPart.value};
 			} 
 		}
 
