@@ -59,6 +59,22 @@
 		}		
 	}
 
+	function logFirstOrderFlow(firstOrderFlow) {
+		var i;
+
+		for (i = 0; i < firstOrderFlows.length; i++) {
+			if (firstOrderFlow.origin === firstOrderFlows[i].origin &&
+				firstOrderFlow.method === firstOrderFlows[i].method &&
+				firstOrderFlow.key === firstOrderFlows[i].key) {
+
+				firstOrderFlows[i] = firstOrderFlow;
+				return;
+			}
+		}
+
+		firstOrderFlows.push(firstOrderFlow);
+	}
+
 	chrome.runtime.onMessage.addListener(
 		function(flow) {
 			// Log to server
@@ -68,7 +84,7 @@
 
 			// Log locally
 			if (flow.type === "firstOrder") {
-				firstOrderFlows.push(flow);
+				logFirstOrderFlow(flow);
 			} else if (flow.type === "secondOrder") {
 				secondOrderFlows.push(flow);
 				checkForVulnerability(flow);

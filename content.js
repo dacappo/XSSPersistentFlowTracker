@@ -8,6 +8,45 @@
 		localStorageSet = [],
 		localStorageGet = [];
 
+	function logCookieSet(dataset) {
+		var i = 0;
+
+		for (i = 0; i < cookiesSet.length; i++) {
+			if (dataset.key === cookiesSet[i].key) {
+
+				cookiesSet[i] = dataset;
+				return;
+			}
+		}
+		cookiesSet.push(dataset);
+	}
+
+	function logSessionStorageSet(dataset) {
+		var i = 0;
+
+		for (i = 0; i < sessionStorageSet.length; i++) {
+			if (dataset.key === sessionStorageSet[i].key) {
+				sessionStorageSet[i] = dataset;
+				return;
+			}
+		}
+
+		sessionStorageSet.push(dataset);
+	}
+
+	function logLocalStorageSet(dataset) {
+		var i = 0;
+
+		for (i = 0; i < localStorageSet.length; i++) {
+			if (dataset.key === localStorageSet[i].key) {
+				localStorageSet[i] = dataset;
+				return;
+			}
+		}
+
+		localStorageSet.push(dataset);
+ 	}
+
 	/* Message to background page */
 	function messageBackground(flow) {
 		chrome.runtime.sendMessage(flow);
@@ -29,13 +68,13 @@
 	/* Log the wrapped function call information*/
 	function handleFunctionCall(dataset) {
 		if (dataset.method === "setCookie") {
-			cookiesSet.push(dataset);
+			logCookieSet(dataset);
 		} else if (dataset.method === "getCookie") {
 			cookiesGet.push(dataset);
 		} else if (dataset.method === "sessionStorage.setItem") {
-			sessionStorageSet.push(dataset);
+			logSessionStorageSet(dataset);
 		} else if (dataset.method === "localStorage.setItem") {
-			localStorageSet.push(dataset);
+			logLocalStorageSet(dataset);
 		} else if (dataset.method === "sessionStorage.getItem") {
 			sessionStorageGet.push(dataset);
 		} else if (dataset.method === "localStorage.getItem") {
@@ -166,11 +205,20 @@
 			if (flow.data.indexOf(cookiesSet[i].value) >= 0) {
 				flow.key = cookiesSet[i].key;
 				flow.value = cookiesSet[i].value;
-				flow.method = cookiesSet[i].method; 
+				flow.method = cookiesSet[i].method;
+				flow.expire = cookiesSet[i].expire;
 			}
 		}
 
-		traceFirstOrderFlow(flow);
+		if (flow.expire){
+			if (Date.parse(flow.expire) > Date.parse(Date())) {
+				traceFirstOrderFlow(flow);
+			}
+		} else {
+			traceFirstOrderFlow(flow);
+		}
+
+		
 	}
 
 	function matchFirstOrderFlow(flow) {

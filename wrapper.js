@@ -109,8 +109,8 @@ var wrapper = {};
 
   };
 
-  function reportSetCookie(url, key, value) {
-  	window.postMessage({"sender" : "FROM_WRAPPER", "dataset" : { "method" : "setCookie", "url" : url, "key" : key, "value" : value }}, "*");
+  function reportSetCookie(url, key, value, expire) {
+  	window.postMessage({"sender" : "FROM_WRAPPER", "dataset" : { "method" : "setCookie", "url" : url, "key" : key, "value" : value , "expire" : expire}}, "*");
   }
 
   function reportGetCookie(url, pairs) {
@@ -122,7 +122,7 @@ var wrapper = {};
   function setCookie(input) {
 
     // Log function call
-    reportSetCookie(location.href, cookieParser.getKey(input), cookieParser.getValue(input), cookieParser.getPath(input), cookieParser.getExpire(input));
+    reportSetCookie(location.href, cookieParser.getKey(input), cookieParser.getValue(input), cookieParser.getExpire(input));
 
     // Restore the document.cookie property
     delete document.cookie;
