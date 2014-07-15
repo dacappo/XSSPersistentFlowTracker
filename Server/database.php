@@ -30,9 +30,13 @@
 	function initializeDatabase($dbh) {
 		$queries = array();
 		
-		array_push($queries, $createTableSessionWrite = $dbh->prepare('CREATE TABLE IF NOT EXISTS FirstOrderFlows (`ID` char(13) NOT NULL, `Sink` int, `Method` varchar(100), `Origin` varchar(2048), `Url` varchar(2048), `Script` varchar(2048), `Data` text, `TaintArray` text, `Key` varchar(2048), `Value` varchar(2048), PRIMARY KEY (ID))'));
+		array_push($queries, $createTableFirstOrderFlowWrite = $dbh->prepare('CREATE TABLE IF NOT EXISTS FirstOrderFlows (`ID` char(13) NOT NULL, `Sink` int, `Method` varchar(100), `Origin` varchar(2048), `Url` varchar(2048), `Script` varchar(2048), `Data` text, `TaintArray` text, `Key` varchar(2048), `Value` varchar(2048), PRIMARY KEY (ID))'));
 		array_push($queries, $createTableSecondOrderFlowWrite = $dbh->prepare('CREATE TABLE IF NOT EXISTS SecondOrderFlows (`ID` char(13) NOT NULL, `Sink` int, `Origin` varchar(2048), `Url` varchar(2048), `Script` varchar(2048), `Data` text, `TaintArray` text, PRIMARY KEY (ID))'));
 		array_push($queries, $createTableSourcesWrite = $dbh->prepare('CREATE TABLE IF NOT EXISTS SecondOrderFlowSources (`FlowID` char(13) NOT NULL, `Source` varchar(2048), `Key` varchar(2048), `Value` varchar(2048),  FOREIGN KEY (FlowID) REFERENCES SecondOrderFlows(ID))'));
+
+		array_push($queries, $createTableFirstOrderFlowVulnerabilityWrite = $dbh->prepare('CREATE TABLE IF NOT EXISTS FirstOrderFlowsVulnerable (`ID` char(13) NOT NULL, `Sink` int, `Method` varchar(100), `Origin` varchar(2048), `Url` varchar(2048), `Script` varchar(2048), `Data` text, `TaintArray` text, `Key` varchar(2048), `Value` varchar(2048), PRIMARY KEY (ID))'));
+		array_push($queries, $createTableSecondOrderFlowVulnerabilityWrite = $dbh->prepare('CREATE TABLE IF NOT EXISTS SecondOrderFlowsVulnerable (`ID` char(13) NOT NULL, `Sink` int, `Origin` varchar(2048), `Url` varchar(2048), `Script` varchar(2048), `Data` text, `TaintArray` text, PRIMARY KEY (ID))'));
+		array_push($queries, $createTableSourcesVulnerabilityWrite = $dbh->prepare('CREATE TABLE IF NOT EXISTS SecondOrderFlowSourcesVulnerable (`FlowID` char(13) NOT NULL, `Source` varchar(2048), `Key` varchar(2048), `Value` varchar(2048),  FOREIGN KEY (FlowID) REFERENCES SecondOrderFlowsVulnerable(ID))'));
 
 		foreach ($queries as $q) {
 			if($q->execute()) {

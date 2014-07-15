@@ -12,8 +12,8 @@
 
 	var settings = JSON.parse(xhr.responseText);
 
-	function serializeForRequest(obj) {
-		return "data=" + encodeURIComponent(JSON.stringify(obj));
+	function serializeForRequest(obj, key) {
+		return key + "=" + encodeURIComponent(JSON.stringify(obj));
 	}
 
 	function reportFlow(flow) {
@@ -26,7 +26,19 @@
 		xhr.send(data);
 	}
 
+	function reportVulnerabilityToServer(firstOrderFlow, secondOrderFlow) {
+		var xhr = new XMLHttpRequest();
+		var src = "http://" + settings.server.host + ":" + settings.server.port + "/reportVulnerability.php";
+		var first = serializeForRequest(firstOrderFlow, "first");
+		var second = serializeForRequest(secondOrderFlow, "second");
+
+		xhr.open("POST", src, true);
+		xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		xhr.send(first + "&" + second);
+	}
+
 	function alertVulnerability(firstOrderFlow, secondOrderFlow) {
+		reportVulnerabilityToServer(firstOrderFlow, secondOrderFlow);
 		alert("Vulnerability detected: " + JSON.stringify(firstOrderFlow) + "||" + JSON.stringify(secondOrderFlow));
 	}
 

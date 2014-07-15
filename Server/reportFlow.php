@@ -101,7 +101,3 @@
 	header('Access-Control-Allow-Methods: GET, PUT, POST, DELETE, OPTIONS');
 	header('Content-type: application/json');
 	header('Cache-Control: no-cahe, must-revalidate');
-
-	$result = ['sink'=>$DATA->{"sink"}];
-
-	echo (json_encode($result));
