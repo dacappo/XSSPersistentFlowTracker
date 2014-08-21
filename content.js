@@ -202,19 +202,19 @@
 		// Loop through traced cookie set calles
 		for (i = 0; i < cookiesSet.length; i++) {
 			// Match taint information with wrapper information
-			if (flow.data.indexOf(cookiesSet[i].value) >= 0) {
+			if (flow.data.split(";")[0].concat(";").indexOf(cookiesSet[i].value) >= 0) {
 				flow.key = cookiesSet[i].key;
 				flow.value = cookiesSet[i].value;
 				flow.method = cookiesSet[i].method;
 				flow.expire = cookiesSet[i].expire;
-			}
+			} 
 		}
 
 		if (flow.expire){
 			if (Date.parse(flow.expire) > Date.parse(Date())) {
 				traceFirstOrderFlow(flow);
 			}
-		} else {
+		} else if (flow.key){
 			traceFirstOrderFlow(flow);
 		}
 

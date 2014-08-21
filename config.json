@@ -12,5 +12,6 @@
 		"port" : "8000"
 	},
 
-	"reportToServer" : true
+	"reportToServer" : true,
+	"showAlertMessage" : false 
 }

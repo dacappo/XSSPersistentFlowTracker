@@ -19,7 +19,7 @@
 	function reportFlow(flow) {
 		var xhr = new XMLHttpRequest();
 		var src = "http://" + settings.server.host + ":" + settings.server.port + "/reportFlow.php";
-		var data = 	serializeForRequest(flow);
+		var data = 	serializeForRequest(flow, "data");
 
 		xhr.open("POST", src, true);
 		xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
@@ -39,7 +39,12 @@
 
 	function alertVulnerability(firstOrderFlow, secondOrderFlow) {
 		reportVulnerabilityToServer(firstOrderFlow, secondOrderFlow);
-		alert("Vulnerability detected: " + JSON.stringify(firstOrderFlow) + "||" + JSON.stringify(secondOrderFlow));
+
+		console.log("Vulnerability detected: " + JSON.stringify(firstOrderFlow) + "||" + JSON.stringify(secondOrderFlow));
+
+		if (settings.showAlertMessage) {
+			alert("Vulnerability detected: " + JSON.stringify(firstOrderFlow) + "||" + JSON.stringify(secondOrderFlow));
+		}
 	}
 
 	function equals(sinkMethod, sourceMethod) {
@@ -74,11 +79,17 @@
 	function logFirstOrderFlow(firstOrderFlow) {
 		var i;
 
+		// Some garbage collection of old flows
+		if (firstOrderFlows.length > 10000) {
+			firstOrderFlows.splice(0, 5000);
+		}
+
 		for (i = 0; i < firstOrderFlows.length; i++) {
 			if (firstOrderFlow.origin === firstOrderFlows[i].origin &&
 				firstOrderFlow.method === firstOrderFlows[i].method &&
 				firstOrderFlow.key === firstOrderFlows[i].key) {
 
+				//Override existing key - values
 				firstOrderFlows[i] = firstOrderFlow;
 				return;
 			}
